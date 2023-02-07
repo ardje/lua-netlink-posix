@@ -1,44 +1,54 @@
-local M={R={},F={},S={},RA={},G={}}
-local function expand(F,R,start,pref,n)
-	for i,v in ipairs(pref) do
-		--print(v..n,start+i-1)
-		F[v..n]=start+i-1
-		R[start+i-1]=v..n
+local M={_R={},_F={},_S={},_RA={},_GL={},_L={}}
+local I=require"inspect"
+local NDGS_PREFIX={"RTM_NEW","RTM_DEL","RTM_GET","RTM_SET"}
+local function expand(o,start,pref,n, parser)
+	local F=o._F
+	local R=o._R
+	local L=o._L
+	local b=1
+	for i,v in  ipairs(NDGS_PREFIX) do
+		if pref & b then
+			--print(v..n,start+i-1)
+			F[v..n]=start+i-1
+			R[start+i-1]=v..n
+			L[start+i-1]=parser
+		else
+			R[start+i]="UNKNOWN"
+		end
+		b=b+b
 	end
-
 end
-local NDGS={"RTM_NEW","RTM_DEL","RTM_GET","RTM_SET"}
-local NDG={"RTM_NEW","RTM_DEL","RTM_GET"}
-local G={"RTM_GET"}
-local N={"RTM_NEW"}
-local GS={"RTM_GET","RTM_SET"}
-expand(M.F,M.R,16,NDGS,"LINK")
-expand(M.F,M.R,20,NDG,"ADDR")
-expand(M.F,M.R,24,NDG,"ROUTE")
-expand(M.F,M.R,28,NDG,"NEIGH")
-expand(M.F,M.R,32,NDG,"RULE")
-expand(M.F,M.R,36,NDG,"QDISC")
-expand(M.F,M.R,40,NDG,"TCLASS")
-expand(M.F,M.R,44,NDG,"TFILTER")
-expand(M.F,M.R,48,NDG,"ACTION")
-expand(M.F,M.R,52,NDG,"PREFIX")
-expand(M.F,M.R,58,G,"MULTICAST")
-expand(M.F,M.R,62,G,"ANYCAST")
-expand(M.F,M.R,64,N,"NEIGHTBL")
-expand(M.F,M.R,66,GS,"NEIGHTBL")
-expand(M.F,M.R,68,N,"NDUSEROPT")
-expand(M.F,M.R,72,NDG,"ADDRLABEL")
-expand(M.F,M.R,78,GS,"DCB")
-expand(M.F,M.R,80,NDG,"NETCONF")
-expand(M.F,M.R,84,NDG,"MDB")
-expand(M.F,M.R,88,NDG,"NSID")
-expand(M.F,M.R,92,N,"STATS")
-expand(M.F,M.R,94,G,"STATS")
-expand(M.F,M.R,96,N,"CACHEREPORT")
-expand(M.F,M.R,100,NDG,"CHAIN")
-expand(M.F,M.R,104,NDG,"NEXTHOP")
-expand(M.F,M.R,108,NDG,"LINKPROP")
-expand(M.F,M.R,112,NDG,"VLAN")
+do
+local N=0x1
+local D=0x2
+local G=0x4
+local S=0x8
+expand(M,16,N|D|G|S,"LINK")
+expand(M,20,N|D|G,"ADDR")
+expand(M,24,N|D|G,"ROUTE")
+expand(M,28,N|D|G,"NEIGH","ndmsg")
+expand(M,32,N|D|G,"RULE")
+expand(M,36,N|D|G,"QDISC")
+expand(M,40,N|D|G,"TCLASS")
+expand(M,44,N|D|G,"TFILTER")
+expand(M,48,N|D|G,"ACTION")
+expand(M,52,N|D|G,"PREFIX")
+expand(M,56,G,"MULTICAST")
+expand(M,60,G,"ANYCAST")
+expand(M,64,N|G|S,"NEIGHTBL")
+expand(M,68,N,"NDUSEROPT")
+expand(M,72,N|D|G,"ADDRLABEL")
+expand(M,76,G|S,"DCB")
+expand(M,80,N|D|G,"NETCONF")
+expand(M,84,N|D|G,"MDB")
+expand(M,88,N|D|G,"NSID")
+expand(M,92,N|G,"STATS")
+expand(M,96,N,"CACHEREPORT")
+expand(M,100,N|D|G,"CHAIN")
+expand(M,104,N|D|G,"NEXTHOP")
+expand(M,108,N|D|G,"LINKPROP")
+expand(M,112,N|D|G,"VLAN")
+end
 -- /usr/include/linux/neighbour.h
 --[[
 struct ndmsg {
@@ -52,28 +62,72 @@ struct ndmsg {
 };
 ]]
 local su=string.unpack
-M.G.AF_INET6=10
-M.G.AF_INET=2
+M._GL.AF_INET6=10
+M._GL.AF_INET=2
 --local sp=string.pack
-M.S.ndmsg = { pack="Bxxxi4I2BB", fields={"ndm_family","ndm_ifindex","ndm_state","ndm_flags","ndm_type" }}
-M.S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
-function M.parse(struct,data,offset)
-	local S=M.S[struct]
-	print("offset:",offset)
+--[[
+/*
+ *	Neighbor Cache Entry States.
+ */
+
+#define NUD_INCOMPLETE	0x01
+#define NUD_REACHABLE	0x02
+#define NUD_STALE	0x04
+#define NUD_DELAY	0x08
+#define NUD_PROBE	0x10
+#define NUD_FAILED	0x20
+
+/* Dummy states */
+#define NUD_NOARP	0x40
+#define NUD_PERMANENT	0x80
+]]
+local ndm_states={
+	[0x01]="NUD_INCOMPLETE",
+	[0x02]="NUD_REACHABLE",
+	[0x04]="NUD_STALE",
+	[0x08]="NUD_DELAY",
+	[0x10]="NUD_PROBE",
+	[0x20]="NUD_FAILED",
+	[0x40]="NUD_NOARP",
+	[0x80]="NUD_PERMANENT"}
+local ndm_familys={ [2]="AF_INET",[10]="AF_INET6" }
+
+M._S.ndmsg = { pack="Bxxxi4I2BB", fields={{"ndm_family",ndm_familys},"ndm_ifindex",{"ndm_state", ndm_states },"ndm_flags","ndm_type" }}
+M._S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
+local function align(offset)
+	-- Lua indices start at 1, and we actually use index instead of offset
+	return (offset-1+3)&(-1-3)+1
+end
+local function hexdump(buffer)
+	local r={}
+	for i = 1,buffer:len() do
+		r[#r+1]=string.format("%02x",buffer:byte(i))
+	end
+	return table.concat(r," ")
+end
+function M:parse(struct,data,offset)
+	local S=self._S[struct]
+	--print("offset:",offset)
 	if S then
 		local Fs=S.fields
 		local r={}
 		local U={su(S.pack,data,offset)}
 		for i,v in ipairs(U) do
 			if i <= #Fs then
-				r[Fs[i]] = v
-				print(i,v,Fs[i])
+				local n=Fs[i]
+				if type(n)=="table" then
+					v=n[2][v] or v
+					n=n[1]
+				end
+				r[n] = v
+				--print(i,v,n)
 			else
-				print(i,v)
+				--print(i,v)
 				offset=v
 			end
 		end
-		return r, offset
+		--print(I.inspect(r))
+		return r, align(offset)
 	else
 		return nil, "Unknown struct name"
 	end
@@ -100,11 +154,11 @@ enum {
 	__NDA_MAX
 };
 --]]
-M.RA.ndmsg={
-	"NDA_DST",
-	"NDA_LLADDR",
-	"NDA_CACHEINFO",
-	"NDA_PROBES",
+M._RA.ndmsg={
+	{"NDA_DST",hexdump},
+	{"NDA_LLADDR",hexdump},
+	{"NDA_CACHEINFO", "nda_cacheinfo"},
+	{"NDA_PROBES","I4"},
 	"NDA_VLAN",
 	"NDA_PORT",
 	"NDA_VNI",
@@ -116,6 +170,91 @@ M.RA.ndmsg={
 	"NDA_NH_ID",
 	"NDA_FDB_EXT_ATTRS",
 }
+
+function M:parsemessage(data, offset)
+	-- /usr/include/linux/netlink.h
+	local N={}
+	local t,tt,msgl
+	msgl,t,N.nlmsg_flags,N.nlmsg_seq,N.nlmsg_pid,offset=su("I4I2I2I4I4",data,offset)
+	N.nlmsg_type=self._R[t] or t
+	N.nlmsg_len=msgl
+	tt=self._L[t]
+	--print(t, tt)
+	local RT
+	if tt then
+		RT,offset=self:parse(tt,data,offset)
+		local RTMS=self._RA[tt]
+		if RTMS then
+			while offset < msgl do
+				local l,t,loffset=su("I2I2!4",data,offset)
+				local attr=data:sub(loffset,offset+l-1)
+				local RTAT=RTMS[t]
+				--print(RTAT,offset)
+				if type(RTAT)=="table" then
+					local S=RTAT[2]
+					RTAT=RTAT[1]
+					if self._S[S] then
+						RT[RTAT],offset=self:parse(S,data,loffset)
+					elseif type(S) == "function" then
+						RT[RTAT]=S(attr,data,offset,loffset,l)
+						offset=align(offset+l)
+					else
+						RT[RTAT],offset=su(S,data,loffset)
+						offset=align(offset)
+					end
+				else
+					RT[RTAT]=attr
+					offset=align(offset+l)
+				end
+			end
+		end
+	else
+		RT={ data=hexdump(data:sub(offset,offset+msgl-1)) }
+	end
+	return {nlmsg=N,rtmsg=RT},offset
+end
+--[==[
+      local submsg=data:sub(offset)
+      local t=msgt and R[msgt] or msgt
+      print(("%s size:%02x flags:%04x sequence:%08x pid:%d"):format(t,msgl,msgf,msgs,msgpid))
+      --print("got bytes:",t,msgf,msgs,msgpid)
+      local r
+      local submsg=data:sub(offset)
+      print(hexdump(submsg))
+      if t=="RTM_NEWNEIGH" then
+	      --print"parse data"
+	      --print(hexdump(data))
+	      r,offset=N.parse("ndmsg",data,offset)
+	      --assert(r,offset)
+	      --print(r,offset)
+	      if r then
+		    	for k,v in pairs(r) do
+				print("ndmsg",k,v)
+			end
+		end
+		while offset < msgl do
+			local l,t,loffset=su("I2I2!4",data,offset)
+			local attr=data:sub(loffset,offset+l-1)
+			print("type:",N.RA.ndmsg[t])
+			if N.RA.ndmsg[t]=="NDA_CACHEINFO" then
+				r=N.parse("nda_cacheinfo",data,loffset)
+			      if r then
+					for k,v in pairs(r) do
+						print("nda_cacheinfo",k,v)
+					end
+				end
+			else
+				print(hexdump(attr))
+			end
+			print(offset,l,((offset+l+2)&(-1-3))+1)
+			offset=(offset+l+2)&(-1-3)+1
+      local submsg=data:sub(offset)
+      print(hexdump(submsg))
+		end
+      end
+      print("-")
+--      ]==]
+
 
 -- /usr/include/linux/rtnetlink.h
 --[=[
