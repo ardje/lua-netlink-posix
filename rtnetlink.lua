@@ -1,18 +1,123 @@
-local M={_rev={}}
-local function expand(t,start,pref,n)
+local M={R={},F={},S={},RA={},G={}}
+local function expand(F,R,start,pref,n)
 	for i,v in ipairs(pref) do
-		print(v..n,start+i-1)
-		t[v..n]=start+i-1
-		t._rev[start+i-1]=v..n
+		--print(v..n,start+i-1)
+		F[v..n]=start+i-1
+		R[start+i-1]=v..n
 	end
 
 end
 local NDGS={"RTM_NEW","RTM_DEL","RTM_GET","RTM_SET"}
-local pref2={"RTM_NEW","RTM_DEL","RTM_GET"}
-expand(M,16,NDGS,"LINK")
-expand(M,20,NDG,"ADDR")
-expand(M,24,NDG,"ROUTE")
-expand(M,24,NDG,"ROUTE")
+local NDG={"RTM_NEW","RTM_DEL","RTM_GET"}
+local G={"RTM_GET"}
+local N={"RTM_NEW"}
+local GS={"RTM_GET","RTM_SET"}
+expand(M.F,M.R,16,NDGS,"LINK")
+expand(M.F,M.R,20,NDG,"ADDR")
+expand(M.F,M.R,24,NDG,"ROUTE")
+expand(M.F,M.R,28,NDG,"NEIGH")
+expand(M.F,M.R,32,NDG,"RULE")
+expand(M.F,M.R,36,NDG,"QDISC")
+expand(M.F,M.R,40,NDG,"TCLASS")
+expand(M.F,M.R,44,NDG,"TFILTER")
+expand(M.F,M.R,48,NDG,"ACTION")
+expand(M.F,M.R,52,NDG,"PREFIX")
+expand(M.F,M.R,58,G,"MULTICAST")
+expand(M.F,M.R,62,G,"ANYCAST")
+expand(M.F,M.R,64,N,"NEIGHTBL")
+expand(M.F,M.R,66,GS,"NEIGHTBL")
+expand(M.F,M.R,68,N,"NDUSEROPT")
+expand(M.F,M.R,72,NDG,"ADDRLABEL")
+expand(M.F,M.R,78,GS,"DCB")
+expand(M.F,M.R,80,NDG,"NETCONF")
+expand(M.F,M.R,84,NDG,"MDB")
+expand(M.F,M.R,88,NDG,"NSID")
+expand(M.F,M.R,92,N,"STATS")
+expand(M.F,M.R,94,G,"STATS")
+expand(M.F,M.R,96,N,"CACHEREPORT")
+expand(M.F,M.R,100,NDG,"CHAIN")
+expand(M.F,M.R,104,NDG,"NEXTHOP")
+expand(M.F,M.R,108,NDG,"LINKPROP")
+expand(M.F,M.R,112,NDG,"VLAN")
+-- /usr/include/linux/neighbour.h
+--[[
+struct ndmsg {
+	__u8		ndm_family;
+	__u8		ndm_pad1;
+	__u16		ndm_pad2;
+	__s32		ndm_ifindex;
+	__u16		ndm_state;
+	__u8		ndm_flags;
+	__u8		ndm_type;
+};
+]]
+local su=string.unpack
+M.G.AF_INET6=10
+M.G.AF_INET=2
+--local sp=string.pack
+M.S.ndmsg = { pack="Bxxxi4I2BB", fields={"ndm_family","ndm_ifindex","ndm_state","ndm_flags","ndm_type" }}
+M.S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
+function M.parse(struct,data,offset)
+	local S=M.S[struct]
+	print("offset:",offset)
+	if S then
+		local Fs=S.fields
+		local r={}
+		local U={su(S.pack,data,offset)}
+		for i,v in ipairs(U) do
+			if i <= #Fs then
+				r[Fs[i]] = v
+				print(i,v,Fs[i])
+			else
+				print(i,v)
+				offset=v
+			end
+		end
+		return r, offset
+	else
+		return nil, "Unknown struct name"
+	end
+end
+
+-- /usr/include/linux/neighbour.h
+--[[
+enum {
+	NDA_UNSPEC,
+	NDA_DST,
+	NDA_LLADDR,
+	NDA_CACHEINFO,
+	NDA_PROBES,
+	NDA_VLAN,
+	NDA_PORT,
+	NDA_VNI,
+	NDA_IFINDEX,
+	NDA_MASTER,
+	NDA_LINK_NETNSID,
+	NDA_SRC_VNI,
+	NDA_PROTOCOL,  /* Originator of entry */
+	NDA_NH_ID,
+	NDA_FDB_EXT_ATTRS,
+	__NDA_MAX
+};
+--]]
+M.RA.ndmsg={
+	"NDA_DST",
+	"NDA_LLADDR",
+	"NDA_CACHEINFO",
+	"NDA_PROBES",
+	"NDA_VLAN",
+	"NDA_PORT",
+	"NDA_VNI",
+	"NDA_IFINDEX",
+	"NDA_MASTER",
+	"NDA_LINK_NETNSID",
+	"NDA_SRC_VNI",
+	"NDA_PROTOCOL",
+	"NDA_NH_ID",
+	"NDA_FDB_EXT_ATTRS",
+}
+
+-- /usr/include/linux/rtnetlink.h
 --[=[
 /* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
 #ifndef __LINUX_RTNETLINK_H
@@ -673,3 +778,4 @@ enum {
 
 #endif /* __LINUX_RTNETLINK_H */
 ]=]
+return M
