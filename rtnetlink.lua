@@ -18,13 +18,14 @@ local function expand(o,start,pref,n, parser)
 		b=b+b
 	end
 end
+local function print() end
 do
 local N=0x1
 local D=0x2
 local G=0x4
 local S=0x8
 expand(M,16,N|D|G|S,"LINK")
-expand(M,20,N|D|G,"ADDR")
+expand(M,20,N|D|G,"ADDR","ifaddrmsg")
 expand(M,24,N|D|G,"ROUTE")
 expand(M,28,N|D|G,"NEIGH","ndmsg")
 expand(M,32,N|D|G,"RULE")
@@ -49,51 +50,24 @@ expand(M,104,N|D|G,"NEXTHOP")
 expand(M,108,N|D|G,"LINKPROP")
 expand(M,112,N|D|G,"VLAN")
 end
--- /usr/include/linux/neighbour.h
---[[
-struct ndmsg {
-	__u8		ndm_family;
-	__u8		ndm_pad1;
-	__u16		ndm_pad2;
-	__s32		ndm_ifindex;
-	__u16		ndm_state;
-	__u8		ndm_flags;
-	__u8		ndm_type;
-};
-]]
 local su=string.unpack
 M._GL.AF_INET6=10
 M._GL.AF_INET=2
 --local sp=string.pack
---[[
-/*
- *	Neighbor Cache Entry States.
- */
 
-#define NUD_INCOMPLETE	0x01
-#define NUD_REACHABLE	0x02
-#define NUD_STALE	0x04
-#define NUD_DELAY	0x08
-#define NUD_PROBE	0x10
-#define NUD_FAILED	0x20
+local function register(self,top)
+	for k,v in pairs(self) do
+		if k:match"_" then
+			for i,j in pairs(v) do
+				top[k][i]=j
+			end
+		end
+	end
+end
+register(require"rtnl/neighbour",M)
+register(require"rtnl/ifaddr",M)
 
-/* Dummy states */
-#define NUD_NOARP	0x40
-#define NUD_PERMANENT	0x80
-]]
-local ndm_states={
-	[0x01]="NUD_INCOMPLETE",
-	[0x02]="NUD_REACHABLE",
-	[0x04]="NUD_STALE",
-	[0x08]="NUD_DELAY",
-	[0x10]="NUD_PROBE",
-	[0x20]="NUD_FAILED",
-	[0x40]="NUD_NOARP",
-	[0x80]="NUD_PERMANENT"}
-local ndm_familys={ [2]="AF_INET",[10]="AF_INET6" }
 
-M._S.ndmsg = { pack="Bxxxi4I2BB", fields={{"ndm_family",ndm_familys},"ndm_ifindex",{"ndm_state", ndm_states },"ndm_flags","ndm_type" }}
-M._S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
 local function align(offset)
 	-- Lua indices start at 1, and we actually use index instead of offset
 	return (offset-1+3)&(-1-3)+1
@@ -133,44 +107,6 @@ function M:parse(struct,data,offset)
 	end
 end
 
--- /usr/include/linux/neighbour.h
---[[
-enum {
-	NDA_UNSPEC,
-	NDA_DST,
-	NDA_LLADDR,
-	NDA_CACHEINFO,
-	NDA_PROBES,
-	NDA_VLAN,
-	NDA_PORT,
-	NDA_VNI,
-	NDA_IFINDEX,
-	NDA_MASTER,
-	NDA_LINK_NETNSID,
-	NDA_SRC_VNI,
-	NDA_PROTOCOL,  /* Originator of entry */
-	NDA_NH_ID,
-	NDA_FDB_EXT_ATTRS,
-	__NDA_MAX
-};
---]]
-M._RA.ndmsg={
-	{"NDA_DST",hexdump},
-	{"NDA_LLADDR",hexdump},
-	{"NDA_CACHEINFO", "nda_cacheinfo"},
-	{"NDA_PROBES","I4"},
-	"NDA_VLAN",
-	"NDA_PORT",
-	"NDA_VNI",
-	"NDA_IFINDEX",
-	"NDA_MASTER",
-	"NDA_LINK_NETNSID",
-	"NDA_SRC_VNI",
-	"NDA_PROTOCOL",
-	"NDA_NH_ID",
-	"NDA_FDB_EXT_ATTRS",
-}
-
 function M:parsemessage(data, offset)
 	-- /usr/include/linux/netlink.h
 	local N={}
@@ -180,6 +116,7 @@ function M:parsemessage(data, offset)
 	N.nlmsg_len=msgl
 	tt=self._L[t]
 	--print(t, tt)
+	print(hexdump(data))
 	local RT
 	if tt then
 		RT,offset=self:parse(tt,data,offset)
@@ -189,21 +126,30 @@ function M:parsemessage(data, offset)
 				local l,t,loffset=su("I2I2!4",data,offset)
 				local attr=data:sub(loffset,offset+l-1)
 				local RTAT=RTMS[t]
-				--print(RTAT,offset)
 				if type(RTAT)=="table" then
+					print(RTAT[1],offset,t,hexdump (attr))
 					local S=RTAT[2]
 					RTAT=RTAT[1]
 					if self._S[S] then
+						print("the struct")
 						RT[RTAT],offset=self:parse(S,data,loffset)
 					elseif type(S) == "function" then
-						RT[RTAT]=S(attr,data,offset,loffset,l)
+						print("the function")
+						RT[RTAT]=S(attr,RT,data,offset,loffset,l)
+						offset=align(offset+l)
+					elseif type(S) == "table" then
+						print("the table")
+						local v=su(S[1],data,loffset)
+						RT[RTAT]=S[v+2] or "UNKNOWN"
 						offset=align(offset+l)
 					else
-						RT[RTAT],offset=su(S,data,loffset)
-						offset=align(offset)
+						print("the su")
+						RT[RTAT]=su(S,data,loffset)
+						offset=align(offset+l)
 					end
 				else
-					RT[RTAT]=attr
+					print(RTAT,offset,t,hexdump (attr))
+					RT[RTAT or t]=hexdump(attr)
 					offset=align(offset+l)
 				end
 			end
