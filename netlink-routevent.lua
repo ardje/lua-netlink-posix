@@ -1,5 +1,5 @@
 #! /usr/bin/env lua-any
--- Lua-Versions: 5.3 5.4
+-- Lua-Versions: 5.3
 --package.path = package.path .. ";/opt/zbstudio/lualibs/mobdebug/?.lua"
 --require('mobdebug').start()
 
