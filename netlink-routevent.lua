@@ -1,5 +1,7 @@
 #! /usr/bin/env lua-any
 -- Lua-Versions: 5.3 5.4
+--package.path = package.path .. ";/opt/zbstudio/lualibs/mobdebug/?.lua"
+--require('mobdebug').start()
 
 local M = require 'posix.sys.socket'
 local I = require "inspect"
