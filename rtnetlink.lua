@@ -26,7 +26,7 @@ local G=0x4
 local S=0x8
 expand(M,16,N|D|G|S,"LINK")
 expand(M,20,N|D|G,"ADDR","ifaddrmsg")
-expand(M,24,N|D|G,"ROUTE")
+expand(M,24,N|D|G,"ROUTE","rtmsg")
 expand(M,28,N|D|G,"NEIGH","ndmsg")
 expand(M,32,N|D|G,"RULE")
 expand(M,36,N|D|G,"QDISC")
@@ -66,6 +66,7 @@ local function register(self,top)
 end
 register(require"rtnl/neighbour",M)
 register(require"rtnl/ifaddr",M)
+register(require"rtnl/route",M)
 
 
 local function align(offset)
