@@ -64,16 +64,14 @@ local function register(self,top)
 		end
 	end
 end
+local lib=require"rtnl/lib"
 register(require"rtnl/neighbour",M)
 register(require"rtnl/ifaddr",M)
 register(require"rtnl/route",M)
 register(require"rtnl/link",M)
 
 
-local function align(offset)
-	-- Lua indices start at 1, and we actually use index instead of offset
-	return (offset-1+3)&(-1-3)+1
-end
+local align=lib.align
 local function hexdump(buffer)
 	local r={}
 	for i = 1,buffer:len() do
@@ -131,7 +129,7 @@ function M:parsemessage(data, offset)
 				local attr=data:sub(loffset,offset+l-1)
 				local RTAT=RTMS[t]
 				if type(RTAT)=="table" then
-					print(RTAT[1],offset,t,hexdump (attr))
+					print(RTAT[1],offset,l,t,hexdump (attr))
 					local S=RTAT[2]
 					RTAT=RTAT[1]
 					if self._S[S] then
