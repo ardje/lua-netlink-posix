@@ -18,7 +18,7 @@ struct rtmsg {
 ]]
 
 M._S.rtmsg = {
-	pack="BBBBBBBBb", fields={
+	pack="BBBBBBBBI4", fields={
 		{"family",lib.familys},
 		"dst_len",
 		"src_len",

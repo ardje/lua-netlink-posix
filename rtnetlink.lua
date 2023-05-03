@@ -18,13 +18,13 @@ local function expand(o,start,pref,n, parser)
 		b=b+b
 	end
 end
-local function print() end
+--local function print() end
 do
 local N=0x1
 local D=0x2
 local G=0x4
 local S=0x8
-expand(M,16,N|D|G|S,"LINK")
+expand(M,16,N|D|G|S,"LINK","ifinfomsg")
 expand(M,20,N|D|G,"ADDR","ifaddrmsg")
 expand(M,24,N|D|G,"ROUTE","rtmsg")
 expand(M,28,N|D|G,"NEIGH","ndmsg")
@@ -67,6 +67,7 @@ end
 register(require"rtnl/neighbour",M)
 register(require"rtnl/ifaddr",M)
 register(require"rtnl/route",M)
+register(require"rtnl/link",M)
 
 
 local function align(offset)
@@ -122,9 +123,11 @@ function M:parsemessage(data, offset)
 	if tt then
 		RT,offset=self:parse(tt,data,offset)
 		local RTMS=self._RA[tt]
+		--print(I.inspect(RT),offset,I.inspect(RTMS))
 		if RTMS then
 			while offset < msgl do
 				local l,t,loffset=su("I2I2!4",data,offset)
+				--print("RTAT:",l,t,loffset)
 				local attr=data:sub(loffset,offset+l-1)
 				local RTAT=RTMS[t]
 				if type(RTAT)=="table" then
@@ -134,6 +137,8 @@ function M:parsemessage(data, offset)
 					if self._S[S] then
 						print("the struct")
 						RT[RTAT],offset=self:parse(S,data,loffset)
+						--RT[RTAT],offset=self:parse(S,data,loffset)
+						--offset=align(offset+l) -- ?
 					elseif type(S) == "function" then
 						print("the function")
 						RT[RTAT]=S(attr,RT,data,offset,loffset,l)

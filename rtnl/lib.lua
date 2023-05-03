@@ -12,6 +12,9 @@ function M.itoa(buffer,rtmsg)
 		return sf("%x:%x:%x:%x:%x:%x:%x:%x",su(">I2I2I2I2I2I2I2I2",buffer))
 	end
 end
+function M.sfq(buffer)
+	return sf("%q",buffer)
+end
 function M.hexdump(buffer)
 	local r={}
 	for i = 1,buffer:len() do
