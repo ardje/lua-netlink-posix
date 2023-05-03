@@ -3,7 +3,9 @@ local sf=string.format
 local su=string.unpack
 function M.align(offset)
 	-- Lua indices start at 1, and we actually use index instead of offset
-	return (offset-1+3)&(-1-3)+1
+	--return (offset-1+3)&(-1-3)+1
+	-- Somehow + was messing up the offset
+	return ((offset-1+3)&(-1-3))+1
 end
 function M.itoa(buffer,rtmsg)
 	if rtmsg.family == "AF_INET" then
