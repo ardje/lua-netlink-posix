@@ -12,7 +12,14 @@
 21058 setsockopt(4, SOL_NETLINK, NETLINK_EXT_ACK, [1], 4) = 0
 21058 bind(4, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 0
 21058 getsockname(4, {sa_family=AF_NETLINK, nl_pid=-1002483183, nl_groups=00000000}, [12]) = 0
-21058 sendmsg(4, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[{nlmsg_len=52, nlmsg_type=RTM_GETLINK, nlmsg_flags=NLM_F_REQUEST, nlmsg_seq=1691395852, nlmsg_pid=0}, {ifi_family=AF_UNSPEC, ifi_type=ARPHRD_NETROM, ifi_index=0, ifi_flags=0, ifi_change=0}, [[{nla_len=8, nla_type=IFLA_EXT_MASK}, RTEXT_FILTER_VF|RTEXT_FILTER_SKIP_STATS], [{nla_len=10, nla_type=IFLA_IFNAME}, "wlan0"]]], iov_len=52}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 52
+21058 sendmsg(4, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[
+{nlmsg_len=52, nlmsg_type=RTM_GETLINK, nlmsg_flags=NLM_F_REQUEST, nlmsg_seq=1691395852, nlmsg_pid=0},
+{ifi_family=AF_UNSPEC, ifi_type=ARPHRD_NETROM, ifi_index=0, ifi_flags=0, ifi_change=0},
+	[
+		[{nla_len=8, nla_type=IFLA_EXT_MASK}, RTEXT_FILTER_VF|RTEXT_FILTER_SKIP_STATS],
+		[{nla_len=10, nla_type=IFLA_IFNAME}, "wlan0"]
+	]
+], iov_len=52}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 52
 21058 recvmsg(4, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=NULL, iov_len=0}], msg_iovlen=1, msg_controllen=0, msg_flags=MSG_TRUNC}, MSG_PEEK|MSG_TRUNC) = 1060
 21058 getrandom("\x0b\xe1\x2b\x64\x84\x45\x10\x00", 8, GRND_NONBLOCK) = 8
 21058 brk(NULL)                         = 0x5613bda7d000
@@ -56,7 +63,13 @@ msg_iov=[{iov_base=[
 			tx_carrier_errors=0, tx_fifo_errors=0, tx_heartbeat_errors=0,
 			tx_window_errors=0, rx_compressed=0, tx_compressed=0, rx_nohandler=0,
 			rx_otherhost_dropped=0}],
-		[{nla_len=100, nla_type=IFLA_STATS}, {rx_packets=3067815, tx_packets=420709, rx_bytes=4243037748, tx_bytes=52021560, rx_errors=0, tx_errors=0, rx_dropped=9636, tx_dropped=0, multicast=0, collisions=0, rx_length_errors=0, rx_over_errors=0, rx_crc_errors=0, rx_frame_errors=0, rx_fifo_errors=0, rx_missed_errors=0, tx_aborted_errors=0, tx_carrier_errors=0, tx_fifo_errors=0, tx_heartbeat_errors=0, tx_window_errors=0, rx_compressed=0, tx_compressed=0, rx_nohandler=0}],
+		[{nla_len=100, nla_type=IFLA_STATS}, {
+			rx_packets=3067815, tx_packets=420709, rx_bytes=4243037748, tx_bytes=52021560,
+			rx_errors=0, tx_errors=0, rx_dropped=9636, tx_dropped=0, multicast=0,
+			collisions=0, rx_length_errors=0, rx_over_errors=0, rx_crc_errors=0,
+			rx_frame_errors=0, rx_fifo_errors=0, rx_missed_errors=0, tx_aborted_errors=0,
+			tx_carrier_errors=0, tx_fifo_errors=0, tx_heartbeat_errors=0,
+			tx_window_errors=0, rx_compressed=0, tx_compressed=0, rx_nohandler=0}],
 		[{nla_len=8, nla_type=IFLA_NUM_VF}, 0],
 		[{nla_len=12, nla_type=IFLA_XDP}, [{nla_len=5, nla_type=IFLA_XDP_ATTACHED}, XDP_ATTACHED_NONE]],
 		[{nla_len=10, nla_type=IFLA_PERM_ADDRESS}, 14:13:33:c1:12:17],
