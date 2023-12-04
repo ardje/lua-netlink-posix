@@ -144,7 +144,7 @@ M._RA.ifinfomsg={
 	{"IFLA_IFNAME",lib.sfq},
 	"IFLA_MTU",
 	"IFLA_LINK",
-	"IFLA_QDISC",
+	{"IFLA_QDISC",lib.sfq},
 	--"IFLA_STATS",
 	{"IFLA_STATS", "ifla_stats"},
 	"IFLA_COST",
@@ -168,7 +168,7 @@ M._RA.ifinfomsg={
 	"IFLA_LINKINFO",
 --#define IFLA_LINKINFO IFLA_LINKINFO
 	"IFLA_NET_NS_PID",
-	"IFLA_IFALIAS",
+	{"IFLA_IFALIAS",lib.sfq},
 	"IFLA_NUM_V",	--	/* Number of VFs if device is SR-IOV PF */
 	"IFLA_VFINFO_LIST",
 	--"IFLA_STATS64",
@@ -189,7 +189,7 @@ M._RA.ifinfomsg={
 	"IFLA_CARRIER_CHANGES",
 	"IFLA_PHYS_SWITCH_ID",
 	"IFLA_LINK_NETNSID",
-	"IFLA_PHYS_PORT_NAME",
+	{"IFLA_PHYS_PORT_NAME",lib.sfq},
 	"IFLA_PROTO_DOWN",
 	"IFLA_GSO_MAX_SEGS",
 	"IFLA_GSO_MAX_SIZE",
@@ -205,11 +205,11 @@ M._RA.ifinfomsg={
 	"IFLA_MIN_MTU",
 	"IFLA_MAX_MTU",
 	"IFLA_PROP_LIST",
-	"IFLA_ALT_IFNAME",-- /* Alternative ifname */
+	{"IFLA_ALT_IFNAME",lib.sfq},-- /* Alternative ifname */
 	"IFLA_PERM_ADDRESS",
 	"IFLA_PROTO_DOWN_REASON",
-	"IFLA_PARENT_DEV_NAME",
-	"IFLA_PARENT_DEV_BUS_NAME",
+	{"IFLA_PARENT_DEV_NAME",lib.sfq},
+	{"IFLA_PARENT_DEV_BUS_NAME",lib.sfq},
 	"IFLA_GRO_MAX_SIZE",
 	"IFLA_TSO_MAX_SIZE",
 	"IFLA_TSO_MAX_SEGS",
