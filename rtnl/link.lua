@@ -12,6 +12,25 @@ struct ifinfomsg {
 	unsigned	ifi_change;		/* IFF_* change mask */
 };
 ]]
+local _ifla_stats64={
+"rx_packets", "tx_packets", "rx_bytes", "tx_bytes",
+"rx_errors", "tx_errors", "rx_dropped", "tx_dropped", "multicast",
+"collisions", "rx_length_errors", "rx_over_errors", "rx_crc_errors",
+"rx_frame_errors", "rx_fifo_errors", "rx_missed_errors", "tx_aborted_errors",
+"tx_carrier_errors", "tx_fifo_errors", "tx_heartbeat_errors",
+"tx_window_errors", "rx_compressed", "tx_compressed", "rx_nohandler",
+"rx_otherhost_dropped"}
+
+local _ifla_stats={
+"rx_packets", "tx_packets", "rx_bytes", "tx_bytes",
+"rx_errors", "tx_errors", "rx_dropped", "tx_dropped", "multicast",
+"collisions", "rx_length_errors", "rx_over_errors", "rx_crc_errors",
+"rx_frame_errors", "rx_fifo_errors", "rx_missed_errors", "tx_aborted_errors",
+"tx_carrier_errors", "tx_fifo_errors", "tx_heartbeat_errors",
+"tx_window_errors", "rx_compressed", "tx_compressed", "rx_nohandler"}
+--M._S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
+M._S.ifla_stats64={ pack="I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8", fields=_ifla_stats64 }
+M._S.ifla_stats={ pack="I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4", fields=_ifla_stats }
 
 M._S.ifinfomsg = {
 	pack="BBI2i4I4I4", fields={
@@ -98,6 +117,25 @@ enum {
 };
 --]]
 ]=]
+--[[
+IFLA_STATS64: 25 8 byte integers
+		[{nla_len=204, nla_type=IFLA_STATS64}, {
+			rx_packets=3067815, tx_packets=420709, rx_bytes=4243037748, tx_bytes=52021560,
+			rx_errors=0, tx_errors=0, rx_dropped=9636, tx_dropped=0, multicast=0,
+			collisions=0, rx_length_errors=0, rx_over_errors=0, rx_crc_errors=0,
+			rx_frame_errors=0, rx_fifo_errors=0, rx_missed_errors=0, tx_aborted_errors=0,
+			tx_carrier_errors=0, tx_fifo_errors=0, tx_heartbeat_errors=0,
+			tx_window_errors=0, rx_compressed=0, tx_compressed=0, rx_nohandler=0,
+			rx_otherhost_dropped=0}],
+IFLA_STATS: 24 8 byte integers
+		[{nla_len=100, nla_type=IFLA_STATS}, {
+			rx_packets=3067815, tx_packets=420709, rx_bytes=4243037748, tx_bytes=52021560,
+			rx_errors=0, tx_errors=0, rx_dropped=9636, tx_dropped=0, multicast=0,
+			collisions=0, rx_length_errors=0, rx_over_errors=0, rx_crc_errors=0,
+			rx_frame_errors=0, rx_fifo_errors=0, rx_missed_errors=0, tx_aborted_errors=0,
+			tx_carrier_errors=0, tx_fifo_errors=0, tx_heartbeat_errors=0,
+			tx_window_errors=0, rx_compressed=0, tx_compressed=0, rx_nohandler=0}],
+--]]
 
 M._RA.ifinfomsg={
 	--"IFLA_UNSPEC",
@@ -107,7 +145,8 @@ M._RA.ifinfomsg={
 	"IFLA_MTU",
 	"IFLA_LINK",
 	"IFLA_QDISC",
-	"IFLA_STATS",
+	--"IFLA_STATS",
+	{"IFLA_STATS", "ifla_stats"},
 	"IFLA_COST",
 --#define IFLA_COST IFLA_COST
 	"IFLA_PRIORITY",
@@ -132,7 +171,9 @@ M._RA.ifinfomsg={
 	"IFLA_IFALIAS",
 	"IFLA_NUM_V",	--	/* Number of VFs if device is SR-IOV PF */
 	"IFLA_VFINFO_LIST",
-	"IFLA_STATS64",
+	--"IFLA_STATS64",
+	{"IFLA_STATS64", "ifla_stats64"},
+	--{"NDA_CACHEINFO", "nda_cacheinfo"},
 	"IFLA_VF_PORTS",
 	"IFLA_PORT_SELF",
 	"IFLA_AF_SPEC",
@@ -167,6 +208,11 @@ M._RA.ifinfomsg={
 	"IFLA_ALT_IFNAME",-- /* Alternative ifname */
 	"IFLA_PERM_ADDRESS",
 	"IFLA_PROTO_DOWN_REASON",
+	"IFLA_PARENT_DEV_NAME",
+	"IFLA_PARENT_DEV_BUS_NAME",
+	"IFLA_GRO_MAX_SIZE",
+	"IFLA_TSO_MAX_SIZE",
+	"IFLA_TSO_MAX_SEGS",
 	"__IFLA_MAX",
 }
 return M
