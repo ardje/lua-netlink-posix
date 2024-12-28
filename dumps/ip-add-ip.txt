@@ -181,8 +181,15 @@ msg_iov=[{iov_base=[
 	]], iov_len=32768}],
 	msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 1060
 21058 close(4)                          = 0
-21058 sendmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[{nlmsg_len=40, nlmsg_type=RTM_NEWADDR, nlmsg_flags=NLM_F_REQUEST|NLM_F_ACK|NLM_F_EXCL|NLM_F_CREATE, nlmsg_seq=1691395852, nlmsg_pid=0}, {ifa_family=AF_INET, ifa_prefixlen=24, ifa_flags=0, ifa_scope=RT_SCOPE_UNIVERSE, ifa_index=if_nametoindex("wlan0")}, [[{nla_len=8, nla_type=IFA_LOCAL}, inet_addr("192.168.0.1")], [{nla_len=8, nla_type=IFA_ADDRESS}, inet_addr("192.168.0.1")]]], iov_len=40}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 40
+21058 sendmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[
+	{nlmsg_len=40, nlmsg_type=RTM_NEWADDR, nlmsg_flags=NLM_F_REQUEST|NLM_F_ACK|NLM_F_EXCL|NLM_F_CREATE, nlmsg_seq=1691395852, nlmsg_pid=0},
+	{ifa_family=AF_INET, ifa_prefixlen=24, ifa_flags=0, ifa_scope=RT_SCOPE_UNIVERSE, ifa_index=if_nametoindex("wlan0")},
+	[[{nla_len=8, nla_type=IFA_LOCAL}, inet_addr("192.168.0.1")], [{nla_len=8, nla_type=IFA_ADDRESS}, inet_addr("192.168.0.1")]]
+], iov_len=40}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 40
 21058 recvmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=NULL, iov_len=0}], msg_iovlen=1, msg_controllen=0, msg_flags=MSG_TRUNC}, MSG_PEEK|MSG_TRUNC) = 36
-21058 recvmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[{nlmsg_len=36, nlmsg_type=NLMSG_ERROR, nlmsg_flags=NLM_F_CAPPED, nlmsg_seq=1691395852, nlmsg_pid=21058}, {error=0, msg={nlmsg_len=40, nlmsg_type=RTM_NEWADDR, nlmsg_flags=NLM_F_REQUEST|NLM_F_ACK|NLM_F_EXCL|NLM_F_CREATE, nlmsg_seq=1691395852, nlmsg_pid=0}}], iov_len=32768}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 36
+21058 recvmsg(3, {msg_name={sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, msg_namelen=12, msg_iov=[{iov_base=[
+{nlmsg_len=36, nlmsg_type=NLMSG_ERROR, nlmsg_flags=NLM_F_CAPPED, nlmsg_seq=1691395852, nlmsg_pid=21058},
+{error=0, msg={nlmsg_len=40, nlmsg_type=RTM_NEWADDR, nlmsg_flags=NLM_F_REQUEST|NLM_F_ACK|NLM_F_EXCL|NLM_F_CREATE, nlmsg_seq=1691395852, nlmsg_pid=0}}
+], iov_len=32768}], msg_iovlen=1, msg_controllen=0, msg_flags=0}, 0) = 36
 21058 exit_group(0)                     = ?
 21058 +++ exited with 0 +++

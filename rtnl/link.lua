@@ -31,6 +31,8 @@ local _ifla_stats={
 --M._S.nda_cacheinfo = { pack="I4I4I4I4", fields={"ndm_confirmed","ndm_used","ndm_updated","ndm_refcnt" }}
 M._S.ifla_stats64={ pack="I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8I8", fields=_ifla_stats64 }
 M._S.ifla_stats={ pack="I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4I4", fields=_ifla_stats }
+M._S.ifla_ifmap={ pack="I8I8I8I2BBI4", fields={
+	"mem_start","mem_end","base_addr","irq","dma","port","_pad" } }
 
 M._S.ifinfomsg = {
 	pack="BBI2i4I4I4", fields={
@@ -159,7 +161,8 @@ M._RA.ifinfomsg={
 --#define IFLA_PROTINFO IFLA_PROTINFO
 	"IFLA_TXQLEN",
 --#define IFLA_TXQLEN IFLA_TXQLEN
-	"IFLA_MAP",
+	--"IFLA_MAP",
+	{"IFLA_MAP","ifla_ifmap"},
 --#define IFLA_MAP IFLA_MAP
 	"IFLA_WEIGHT",
 --#define IFLA_WEIGHT IFLA_WEIGHT
@@ -169,7 +172,7 @@ M._RA.ifinfomsg={
 --#define IFLA_LINKINFO IFLA_LINKINFO
 	"IFLA_NET_NS_PID",
 	{"IFLA_IFALIAS",lib.sfq},
-	"IFLA_NUM_V",	--	/* Number of VFs if device is SR-IOV PF */
+	"IFLA_NUM_VF",	--	/* Number of VFs if device is SR-IOV PF */
 	"IFLA_VFINFO_LIST",
 	--"IFLA_STATS64",
 	{"IFLA_STATS64", "ifla_stats64"},
@@ -213,6 +216,11 @@ M._RA.ifinfomsg={
 	"IFLA_GRO_MAX_SIZE",
 	"IFLA_TSO_MAX_SIZE",
 	"IFLA_TSO_MAX_SEGS",
+	"IFLA_ALLMULTI",
+	"IFLA_DEVLINK_PORT",
+	"IFLA_GRO_IPV4_MAX_SIZE",
+	"IFLA_DPLL_PIN",
+	"IFLA_MAX_PACING_OFFLOAD_HORIZON",
 	"__IFLA_MAX",
 }
 return M

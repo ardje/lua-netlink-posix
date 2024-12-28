@@ -53,7 +53,7 @@ end
 local su=string.unpack
 M._GL.AF_INET6=10
 M._GL.AF_INET=2
---local sp=string.pack
+local sp=string.pack
 
 local function register(self,top)
 	for k,v in pairs(self) do
@@ -107,6 +107,9 @@ function M:parse(struct,data,offset)
 	end
 end
 
+function M:createmessage(data)
+	local l,t,loffset=su("I2I2!4",data,offset)
+end
 function M:parsemessage(data, offset)
 	-- /usr/include/linux/netlink.h
 	local N={}
