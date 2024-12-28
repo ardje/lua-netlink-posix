@@ -6,6 +6,7 @@ function M.align(offset)
 	--return (offset-1+3)&(-1-3)+1
 	-- Somehow + was messing up the offset
 	return ((offset-1+3)&(-1-3))+1
+	--return ((offset-1+7)&(-1-7))+1
 end
 function M.itoa(buffer,rtmsg)
 	if rtmsg.family == "AF_INET" then

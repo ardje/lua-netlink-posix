@@ -1,5 +1,5 @@
-local M={_R={},_F={},_S={},_RA={},_GL={},_L={}}
-local I=require"inspect"
+local M={_R={},_F={},_S={},_RA={},_GL={},_L={},_depth=0}
+--local I=require"inspect"
 local NDGS_PREFIX={"RTM_NEW","RTM_DEL","RTM_GET","RTM_SET"}
 local function expand(o,start,pref,n, parser)
 	local F=o._F
@@ -53,7 +53,7 @@ end
 local su=string.unpack
 M._GL.AF_INET6=10
 M._GL.AF_INET=2
-local sp=string.pack
+--local sp=string.pack
 
 local function register(self,top)
 	for k,v in pairs(self) do
@@ -107,23 +107,29 @@ function M:parse(struct,data,offset)
 	end
 end
 
+--[[
 function M:createmessage(data)
 	local l,t,loffset=su("I2I2!4",data,offset)
 end
+]]
 function M:parsemessage(data, offset)
 	-- /usr/include/linux/netlink.h
 	local N={}
-	local t,tt,msgl
-	msgl,t,N.nlmsg_flags,N.nlmsg_seq,N.nlmsg_pid,offset=su("I4I2I2I4I4",data,offset)
-	N.nlmsg_type=self._R[t] or t
+	-- nlmsgt is used as an index in the decoder table
+	local nlmsgt,parsert,msgl
+	msgl,nlmsgt,N.nlmsg_flags,N.nlmsg_seq,N.nlmsg_pid,offset=su("I4I2I2I4I4",data,offset)
+	-- nlmsg_type is the name
+	N.nlmsg_type=self._R[nlmsgt] or nlmsgt
 	N.nlmsg_len=msgl
-	tt=self._L[t]
+	-- parsert is the decoding instructions for nlmsgt
+	parsert=self._L[nlmsgt]
 	--print(t, tt)
 	print(hexdump(data))
 	local RT
-	if tt then
-		RT,offset=self:parse(tt,data,offset)
-		local RTMS=self._RA[tt]
+	-- we know how to decode it
+	if parsert then
+		RT,offset=self:parse(parsert,data,offset)
+		local RTMS=self._RA[parsert]
 		--print(I.inspect(RT),offset,I.inspect(RTMS))
 		if RTMS then
 			while offset < msgl do
